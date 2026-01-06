@@ -1,6 +1,25 @@
 import discord
-import os  # Import the OS library to read environment variables
+import os
 from discord import app_commands
+from flask import Flask
+from threading import Thread
+
+# --- Web Server Section ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "great! the bot should now be usable."
+
+def run():
+    # Render assigns a PORT via environment variables, default to 8080 or 10000 if missing
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+# --------------------------
 
 class MyBot(discord.Client):
     def __init__(self):
@@ -26,7 +45,10 @@ async def sora2(interaction: discord.Interaction):
 # Retrieve the token from the environment variable
 token = os.getenv("BOT_TOKEN")
 
-# Simple check to ensure the token exists before running
+# Start the web server first
+keep_alive()
+
+# Run the bot
 if token:
     client.run(token)
 else:
